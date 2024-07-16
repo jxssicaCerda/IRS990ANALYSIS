@@ -1,0 +1,138 @@
+---
+title: "Nonprofit Tax Data Analysis"
+author: "Jessica Cerda"
+date: "2024-04-10"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Nonprofit Tax Data Analysis
+
+## Introduction
+
+An analysis on the yearly Total Contribution Amount for the following five nonprofits specific to education
+
+-   STEP UP FOR STUDENTS INC.
+
+    -   STEP UP FOR STUDENTS EMPOWERS FAMILIES TO PURSUE AND ENGAGE IN THE MOST APPROPRIATE LEARNING OPTIONS FOR THEIR CHILDREN, WITH AN EMPHASIS ON FAMILIES WHO LACK THE INFORMATION AND FINANCIAL RESOURCES TO ACCESS THESE OPTIONS. BY PURSUING THIS MISSION, WE HELP PUBLIC EDUCATION FULFILL THE .PROMISE OF EQUAL OPPORTUNITY.
+
+-   HENNEPIN HEALTHCARE SYSTEM INC
+
+    -   WE PARTNER WITH OUR COMMUNITY, OUR PATIENTS, AND THEIR FAMILIES TO ENSURE OUTSTANDING CARE FOR EVERYONE, WHILE IMPROVING HEALTH AND WELLNESS THROUGH TEACHING, PATIENT AND COMMUNITY EDUCATION, AND RESEARCH.
+
+-   Queen's University at Kingston
+
+    -   Providing secondary and post-graduate education and undertaking research activities.
+
+-   INDIANA UNIVERSITY HEALTH BALL MEMORIAL
+
+    -   Improve the health of our patients and community through innovation and excellence in care, education, research and service.
+
+-   EVERGLADES COLLEGE INC
+
+    -   KEISER UNIVERSITY AND EVERGLADES UNIVERSITY ARE REGIONALLY ACCREDITED PRIVATE CAREER UNIVERSITIES THAT PROVIDE EDUCATIONAL PROGRAMS AT THE UNDERGRADUATE AND GRADUATE LEVELS FOR A DIVERSE STUDENT BODY IN TRADITIONAL, NONTRADITIONAL AND ONLINE DELIVERY FORMATS. THE MAIN CAMPUS IS LOCATED IN FORT LAUDERDALE, WITH CAMPUSES LOCATED THROUGHOUT THE STATE OF FLORIDA AND INTERNATIONALLY. THROUGH QUALITY TEACHING, LEARNING AND RESEARCH, THE UNIVERSITY IS COMMITTED TO PROVIDE STUDENTS WITH OPPORTUNITIES TO DEVELOP THE KNOWLEDGE, UNDERSTANDING AND SKILLSNECESSARY FOR SUCCESSFUL EMPLOYMENT. COMMITTED TO A "STUDENTS FIRST" PHILOSOPHY, KEISER UNIVERSITY PREPARES GRADUATES FOR CAREERS IN BUSINESS, CRIMINAL JUSTICE, HEALTH CARE, TECHNOLOGY, HOSPITALITY, EDUCATION AND CAREER-FOCUSED STUDIES.
+
+The data set was created by going through 2.3 million IRS990 files located on the [IRS website](https://www.irs.gov/charities-non-profits/required-filing-form-990-series).
+
+## Plot
+
+The following are various plots that depict the findings from the `nonprofit` data set.
+
+#Plot for the Total Revenue Count
+
+ggplot(data = nonprofits,
+
+mapping = aes(x = Year, y = CYTotalRevenueAmt, col = BusinessName)) + geom_line() + labs(x = "Year", y = "Yearly Revenue (in USD)", title = "The Yearly Total Revenue Count for Educational Nonprofits", caption = "All of the nonprofits above saw growth within their Total Yearly Revenue throughout the years reported, with Hennepin Healthcare System INC having the highest yearly total revenue.")
+
+```{r}
+library(tidyverse)
+
+#reading in the data created for the Plot
+nonprofits <- read.csv("/Users/jessicacerda/Desktop/STAT 129/nonprofits.csv")
+
+#Converts the Business names to All Caps
+nonprofits$BusinessName <- toupper(nonprofits$BusinessName)
+
+
+#convert returnDateStamp to Date
+nonprofits$returnDateStamp <- as.Date.character(nonprofits$returnDateStamp)
+
+#extract the year from the date
+nonprofits <- nonprofits |> mutate(Year = year(nonprofits$returnDateStamp))
+
+```
+
+```{r}
+#plot for Total Contribution Amount For Each Nonprofit
+
+ggplot(
+  data = nonprofits,
+  mapping = aes(x = Year, y = TotalContributionsAmt, col = BusinessName)) + geom_line() + labs(x = "Year", y = "Total Contribution Amount (in USD)", title = "The Total Contribution Amount for Educational Nonprofits")
+```
+
+The graph shows several different findings. The graph shows that Everglades College Inc. and Indiana University Health Ball Memorial contribute little if any of their earnings per year. Hennepine Healthcare System INC saw a growth and then a decline within their yearly contribution amount while Queen's University at Kingston was mostly stagnant. Step up for Students was consistent within their growth in their yearly contribution amount.
+
+```{r}
+
+#Plot for the Total Employee Count
+ggplot(data = nonprofits,
+     mapping = aes(x = Year, y = TotalEmployeeCnt, col = BusinessName)) + geom_line() + labs(x = "Year", y = "Employee Amount", title = "The Total Employee Count for Educational Nonprofits") 
+```
+
+The graph depicts nearly stagnant Employee numbers for four of the five nonprofits. The nonprofit Queen's Univeristy at Kingston saw major growth in the number of emplyees from 2022 to the year 2023.
+
+```{r}
+
+#Plot for the Total Revenue Count
+ggplot(data = nonprofits,
+       mapping = aes(x = Year, y = CYTotalRevenueAmt, col = BusinessName)) + geom_line() + labs(x = "Year", y = "Yearly Revenue (in USD)", title = "The Yearly Total Revenue Count for Educational Nonprofits ")
+
+```
+
+All of the nonprofits above saw growth within their Total Yearly Revenue throughout the years reported, with Hennepin Healthcare System INC having the highest yearly total revenue.
+
+## XPATH
+
+![](Desktop/Screenshot%202024-04-10%20at%208.25.37%20PM.png){width="541"}
+
+The following node in which the regular expression was applied to was the 'ActivityOrMissionDesc' node. This allowed the if statement to evaluate whether there was a mention of education within nonprofit's Activity or Mission Description.
+
+![](Desktop/Screenshot%202024-04-10%20at%208.29.33%20PM.png){width="517"}
+
+In order to determine which nonprofits were the most important, I created a lambda function that would sort all of the nonprofits based off of their Total Revenue Amount from the year 2020. I then took only the bottom five after the sort since the sort function organizes nonprofits from the lowest revenue amount to the highest revenue amount.
+
+## Parallel Programming
+
+![](Desktop/Screenshot%202024-04-10%20at%208.26.21%20PM.png){width="424"}
+
+The parallel programming was used in this program to create 10 parallel workers that would conduct the extract function across all the files in the all990 variable which in this case was over two million three hundred thousand files from the IRS. Using parallel programming allowed the run time for the extract function run time to be cut down to less than a minute with the exact run time being depicted in the screen capture below.
+
+![](Desktop/Screenshot%202024-04-10%20at%208.43.45%20PM.png){width="508"}
+
+## Regular Expression
+
+![](Desktop/Screenshot%202024-04-10%20at%208.25.37%20PM.png){width="722"}
+
+The following code above depicts the regular expression used to find all the nonprofits pertaining to education in the 2.3 million XML IRS 990 Files. The regular expression was put in an "*if"* statement that checked the Activity and Mission Description of the IRS Files. If there was no match then it would return"None" otherwise it would return the result back into the list made for the results. The r in `r'\beducation\b'` indicates that it is a regular expression and the \b at the beginning and end of education indicate word boundaries meaning that the match must be "education" and not another word with the phrase education within it such as "educational"
+
+## Appendix
+
+### [Code used]{.underline}
+
+Extract function
+
+![](Desktop/Screenshot%202024-04-10%20at%209.22.57%20PM.png){width="593"}
+
+Parallel Command
+
+![](Desktop/Screenshot%202024-04-10%20at%208.26.21%20PM.png)
+
+Creating the Data Frame from output of running parallel on the extract function
+
+![](Desktop/Screenshot%202024-04-10%20at%209.25.23%20PM.png)
